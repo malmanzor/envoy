@@ -23,6 +23,7 @@
 #include "source/common/config/utility.h"
 #include "source/common/config/well_known_names.h"
 #include "source/common/network/application_protocol.h"
+#include "source/common/network/downstream_target_port.h"
 #include "source/common/network/proxy_protocol_filter_state.h"
 #include "source/common/network/socket_option_factory.h"
 #include "source/common/network/transport_socket_options_impl.h"
@@ -421,6 +422,19 @@ Network::FilterStatus Filter::initializeUpstreamConnection() {
     cluster->stats().upstream_cx_connect_attempts_exceeded_.inc();
     onInitFailure(UpstreamFailureReason::ConnectFailed);
     return Network::FilterStatus::StopIteration;
+  }
+
+  // Add the upstream port if we need to
+  if (downstreamConnection()) {
+    std::cout << "setting filter config with local address ";
+    std::cout << downstreamConnection()->addressProvider().localAddress()->asString();
+    std::cout << "\n";
+
+    read_callbacks_->connection().streamInfo().filterState()->setData(
+        Network::DownstreamTargetPort::key(),
+        std::make_unique<Network::DownstreamTargetPort>(
+            std::to_string(downstreamConnection()->addressProvider().localAddress()->ip()->port())),
+        StreamInfo::FilterState::StateType::Mutable);
   }
 
   if (downstreamConnection()) {

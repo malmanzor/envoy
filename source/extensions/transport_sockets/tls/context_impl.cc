@@ -1,6 +1,7 @@
 #include "source/extensions/transport_sockets/tls/context_impl.h"
 
 #include <algorithm>
+#include <iostream>
 #include <memory>
 #include <string>
 #include <vector>
@@ -558,9 +559,12 @@ ClientContextImpl::ClientContextImpl(Stats::Scope& scope,
     : ContextImpl(scope, config, time_source),
       server_name_indication_(config.serverNameIndication()),
       allow_renegotiation_(config.allowRenegotiation()),
-      max_session_keys_(config.maxSessionKeys()) {
+      max_session_keys_(config.maxSessionKeys()),
+      append_downstream_port_to_sni_(config.appendDownstreamPortToSni()) {
   // This should be guaranteed during configuration ingestion for client contexts.
   ASSERT(tls_contexts_.size() == 1);
+  // seems to be done at startup - when cluster added?
+  std::cout << "creating a new ClentContextImpl\n";
   if (!parsed_alpn_protocols_.empty()) {
     for (auto& ctx : tls_contexts_) {
       const int rc = SSL_CTX_set_alpn_protos(ctx.ssl_ctx_.get(), parsed_alpn_protocols_.data(),
@@ -608,9 +612,26 @@ bool ContextImpl::parseAndSetAlpn(const std::vector<std::string>& alpn, SSL& ssl
 bssl::UniquePtr<SSL> ClientContextImpl::newSsl(const Network::TransportSocketOptions* options) {
   bssl::UniquePtr<SSL> ssl_con(ContextImpl::newSsl(options));
 
-  const std::string server_name_indication = options && options->serverNameOverride().has_value()
-                                                 ? options->serverNameOverride().value()
-                                                 : server_name_indication_;
+  if (options->serverNameOverride().has_value()) {
+    std::cout << "server name override from options:\n";
+    std::cout << options->serverNameOverride().value();
+  } else {
+    std::cout << "no server name override in options\n";
+  }
+  std::cout << "\nserver name from context:\n";
+  std::cout << server_name_indication_;
+  std::cout << "\n";
+
+  std::string server_name_indication = options && options->serverNameOverride().has_value()
+                                           ? options->serverNameOverride().value()
+                                           : server_name_indication_;
+
+  if (append_downstream_port_to_sni_ && options->downstreamPort().has_value()) {
+    server_name_indication = server_name_indication + ":" + options->downstreamPort().value();
+    std::cout << "\nnew sni:\n";
+    std::cout << server_name_indication;
+    std::cout << "\n";
+  }
 
   if (!server_name_indication.empty()) {
     const int rc = SSL_set_tlsext_host_name(ssl_con.get(), server_name_indication.c_str());

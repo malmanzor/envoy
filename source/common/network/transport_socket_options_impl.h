@@ -29,6 +29,9 @@ public:
   absl::optional<Network::ProxyProtocolData> proxyProtocolOptions() const override {
     return inner_options_->proxyProtocolOptions();
   }
+  const absl::optional<std::string>& downstreamPort() const override {
+    return inner_options_->downstreamPort();
+  }
   void hashKey(std::vector<uint8_t>& key,
                const Network::TransportSocketFactory& factory) const override;
 
@@ -43,13 +46,14 @@ public:
       absl::string_view override_server_name = "",
       std::vector<std::string>&& override_verify_san_list = {},
       std::vector<std::string>&& override_alpn = {}, std::vector<std::string>&& fallback_alpn = {},
-      absl::optional<Network::ProxyProtocolData> proxy_proto_options = absl::nullopt)
+      absl::optional<Network::ProxyProtocolData> proxy_proto_options = absl::nullopt,
+      absl::string_view downstream_port = "")
       : override_server_name_(override_server_name.empty()
                                   ? absl::nullopt
                                   : absl::optional<std::string>(override_server_name)),
         override_verify_san_list_{std::move(override_verify_san_list)},
         override_alpn_list_{std::move(override_alpn)}, alpn_fallback_{std::move(fallback_alpn)},
-        proxy_protocol_options_(proxy_proto_options) {}
+        proxy_protocol_options_(proxy_proto_options), downstream_port_(downstream_port) {}
 
   // Network::TransportSocketOptions
   const absl::optional<std::string>& serverNameOverride() const override {
@@ -67,6 +71,7 @@ public:
   absl::optional<Network::ProxyProtocolData> proxyProtocolOptions() const override {
     return proxy_protocol_options_;
   }
+  const absl::optional<std::string>& downstreamPort() const override { return downstream_port_; }
   void hashKey(std::vector<uint8_t>& key,
                const Network::TransportSocketFactory& factory) const override;
 
@@ -76,6 +81,7 @@ private:
   const std::vector<std::string> override_alpn_list_;
   const std::vector<std::string> alpn_fallback_;
   const absl::optional<Network::ProxyProtocolData> proxy_protocol_options_;
+  const absl::optional<std::string> downstream_port_;
 };
 
 class TransportSocketOptionsUtility {

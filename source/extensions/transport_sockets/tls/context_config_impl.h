@@ -118,6 +118,7 @@ public:
 
   // Ssl::ClientContextConfig
   const std::string& serverNameIndication() const override { return server_name_indication_; }
+  bool appendDownstreamPortToSni() const override { return append_downstream_port_to_sni_; }
   bool allowRenegotiation() const override { return allow_renegotiation_; }
   size_t maxSessionKeys() const override { return max_session_keys_; }
   const std::string& signingAlgorithmsForTest() const override { return sigalgs_; }
@@ -127,6 +128,7 @@ private:
   static const unsigned DEFAULT_MAX_VERSION;
 
   const std::string server_name_indication_;
+  const bool append_downstream_port_to_sni_;
   const bool allow_renegotiation_;
   const size_t max_session_keys_;
   const std::string sigalgs_;

@@ -63,6 +63,7 @@ envoy_cc_library(
         "//source/common/http:codec_client_lib",
         "//source/common/network:application_protocol_lib",
         "//source/common/network:cidr_range_lib",
+        "//source/common/network:downstream_target_port_lib",
         "//source/common/network:filter_lib",
         "//source/common/network:hash_policy_lib",
         "//source/common/network:proxy_protocol_filter_state_lib",

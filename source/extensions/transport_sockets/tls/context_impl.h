@@ -145,6 +145,7 @@ private:
   absl::Mutex session_keys_mu_;
   std::deque<bssl::UniquePtr<SSL_SESSION>> session_keys_ ABSL_GUARDED_BY(session_keys_mu_);
   bool session_keys_single_use_{false};
+  bool append_downstream_port_to_sni_{false};
 };
 
 enum class OcspStapleAction { Staple, NoStaple, Fail, ClientNotCapable };

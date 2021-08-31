@@ -53,6 +53,7 @@ SslSocket::SslSocket(Envoy::Ssl::ContextSharedPtr ctx, InitialState state,
       info_(std::dynamic_pointer_cast<SslHandshakerImpl>(
           handshaker_factory_cb(ctx_->newSsl(transport_socket_options_.get()),
                                 ctx_->sslExtendedSocketInfoIndex(), this))) {
+  std::cout << "new ssl socket\n";
   if (state == InitialState::Client) {
     SSL_set_connect_state(rawSsl());
   } else {
@@ -366,6 +367,7 @@ Network::TransportSocketPtr ClientSslSocketFactory::createTransportSocket(
     ssl_ctx = ssl_ctx_;
   }
   if (ssl_ctx) {
+    std::cout << "creating a new transport socket\n";
     return std::make_unique<SslSocket>(std::move(ssl_ctx), InitialState::Client,
                                        transport_socket_options, config_->createHandshaker());
   } else {

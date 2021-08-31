@@ -176,6 +176,8 @@ public:
    */
   virtual const absl::optional<std::string>& serverNameOverride() const PURE;
 
+  virtual const absl::optional<std::string>& downstreamPort() const PURE;
+
   /**
    * @return the optional overridden SAN names to verify, if the transport socket supports SAN
    *         verification.

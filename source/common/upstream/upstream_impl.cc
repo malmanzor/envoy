@@ -320,6 +320,7 @@ Network::ClientConnectionPtr HostImpl::createConnection(
     connection_options = options;
   }
   ASSERT(!address->envoyInternalAddress());
+  std::cout << "creating a new transport socket in the upstream\n";
   Network::ClientConnectionPtr connection =
       address_list.size() > 1
           ? std::make_unique<Network::HappyEyeballsConnectionImpl>(

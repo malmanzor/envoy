@@ -116,6 +116,8 @@ public:
    *         for names.
    */
   virtual const std::string& signingAlgorithmsForTest() const PURE;
+
+  virtual bool appendDownstreamPortToSni() const PURE;
 };
 
 using ClientContextConfigPtr = std::unique_ptr<ClientContextConfig>;

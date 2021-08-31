@@ -9,6 +9,7 @@
 #include "source/common/common/scalar_to_byte_vector.h"
 #include "source/common/common/utility.h"
 #include "source/common/network/application_protocol.h"
+#include "source/common/network/downstream_target_port.h"
 #include "source/common/network/proxy_protocol_filter_state.h"
 #include "source/common/network/upstream_server_name.h"
 #include "source/common/network/upstream_subject_alt_names.h"
@@ -61,10 +62,13 @@ void TransportSocketOptionsImpl::hashKey(std::vector<uint8_t>& key,
 TransportSocketOptionsConstSharedPtr
 TransportSocketOptionsUtility::fromFilterState(const StreamInfo::FilterState& filter_state) {
   absl::string_view server_name;
+  absl::string_view downstream_port;
   std::vector<std::string> application_protocols;
   std::vector<std::string> subject_alt_names;
   std::vector<std::string> alpn_fallback;
   absl::optional<Network::ProxyProtocolData> proxy_protocol_options;
+
+  std::cout << "creating a new transport socket options using filter state\n";
 
   bool needs_transport_socket_options = false;
   if (filter_state.hasData<UpstreamServerName>(UpstreamServerName::key())) {
@@ -74,10 +78,21 @@ TransportSocketOptionsUtility::fromFilterState(const StreamInfo::FilterState& fi
     needs_transport_socket_options = true;
   }
 
+  // server_name = "httpbin.org:443";
+  // needs_transport_socket_options = true;
+
   if (filter_state.hasData<Network::ApplicationProtocols>(Network::ApplicationProtocols::key())) {
     const auto& alpn = filter_state.getDataReadOnly<Network::ApplicationProtocols>(
         Network::ApplicationProtocols::key());
     application_protocols = alpn.value();
+    needs_transport_socket_options = true;
+  }
+
+  // TODO check the filter state for a sni port addition from the filter state and add it if needed
+  if (filter_state.hasData<DownstreamTargetPort>(DownstreamTargetPort::key())) {
+    const auto& port =
+        filter_state.getDataReadOnly<DownstreamTargetPort>(DownstreamTargetPort::key());
+    downstream_port = port.value();
     needs_transport_socket_options = true;
   }
 

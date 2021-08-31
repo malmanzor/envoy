@@ -19,6 +19,7 @@ envoy_cc_test_library(
         "//source/common/event:dispatcher_lib",
         "//source/common/network:address_lib",
         "//source/common/network:application_protocol_lib",
+        "//source/common/network:downstream_target_port_lib",
         "//source/common/network:transport_socket_options_lib",
         "//source/common/network:upstream_server_name_lib",
         "//source/common/network:upstream_socket_options_filter_state_lib",

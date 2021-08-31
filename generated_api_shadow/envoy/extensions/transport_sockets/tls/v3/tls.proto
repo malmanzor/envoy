@@ -23,6 +23,7 @@ option (udpa.annotations.file_status).package_version_status = ACTIVE;
 // [#extension: envoy.transport_sockets.tls]
 // The TLS contexts below provide the transport socket configuration for upstream/downstream TLS.
 
+// [#next-free-field: 6]
 message UpstreamTlsContext {
   option (udpa.annotations.versioning).previous_message_type =
       "envoy.api.v2.auth.UpstreamTlsContext";
@@ -51,6 +52,8 @@ message UpstreamTlsContext {
   //
   // Defaults to 1, setting this to 0 disables session resumption.
   google.protobuf.UInt32Value max_session_keys = 4;
+
+  bool append_downstream_port_to_sni = 5;
 }
 
 // [#next-free-field: 9]
