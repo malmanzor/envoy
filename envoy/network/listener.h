@@ -137,6 +137,8 @@ public:
    */
   virtual bool bindToPort() PURE;
 
+  virtual bool acceptTrafficOnAnyPort() const PURE;
+
   /**
    * @return bool if a connection should be handed off to another Listener after the original
    *         destination address has been restored. 'true' when 'use_original_dst' flag in listener

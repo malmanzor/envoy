@@ -10,10 +10,11 @@ namespace Server {
 
 ActiveTcpSocket::ActiveTcpSocket(ActiveStreamListenerBase& listener,
                                  Network::ConnectionSocketPtr&& socket,
-                                 bool hand_off_restored_destination_connections)
+                                 bool hand_off_restored_destination_connections,
+                                 bool accept_traffic_on_any_port)
     : listener_(listener), socket_(std::move(socket)),
       hand_off_restored_destination_connections_(hand_off_restored_destination_connections),
-      iter_(accept_filters_.end()),
+      accept_traffic_on_any_port_(accept_traffic_on_any_port), iter_(accept_filters_.end()),
       stream_info_(std::make_unique<StreamInfo::StreamInfoImpl>(
           listener_.dispatcher().timeSource(), socket_->addressProviderSharedPtr(),
           StreamInfo::FilterState::LifeSpan::Connection)) {
@@ -134,7 +135,7 @@ void ActiveTcpSocket::newConnection() {
     // Note also that we must account for the number of connections properly across both listeners.
     // TODO(mattklein123): See note in ~ActiveTcpSocket() related to making this accounting better.
     listener_.decNumConnections();
-    new_listener.value().get().onAcceptWorker(std::move(socket_), false, false);
+    new_listener.value().get().onAcceptWorker(std::move(socket_), false, false, false);
   } else {
     // Set default transport protocol if none of the listener filters did it.
     if (socket_->detectedTransportProtocol().empty()) {

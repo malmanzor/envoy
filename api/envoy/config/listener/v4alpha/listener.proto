@@ -37,7 +37,7 @@ message ListenerCollection {
   repeated xds.core.v3.CollectionEntry entries = 1;
 }
 
-// [#next-free-field: 30]
+// [#next-free-field: 31]
 message Listener {
   option (udpa.annotations.versioning).previous_message_type = "envoy.config.listener.v3.Listener";
 
@@ -314,4 +314,6 @@ message Listener {
     // [#not-implemented-hide:]
     InternalListenerConfig internal_listener = 27;
   }
+
+  google.protobuf.BoolValue accept_traffic_on_any_port = 30;
 }

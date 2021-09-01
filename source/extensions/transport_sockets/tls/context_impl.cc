@@ -558,8 +558,7 @@ ClientContextImpl::ClientContextImpl(Stats::Scope& scope,
                                      TimeSource& time_source)
     : ContextImpl(scope, config, time_source),
       server_name_indication_(config.serverNameIndication()),
-      allow_renegotiation_(config.allowRenegotiation()),
-      max_session_keys_(config.maxSessionKeys()),
+      allow_renegotiation_(config.allowRenegotiation()), max_session_keys_(config.maxSessionKeys()),
       append_downstream_port_to_sni_(config.appendDownstreamPortToSni()) {
   // This should be guaranteed during configuration ingestion for client contexts.
   ASSERT(tls_contexts_.size() == 1);

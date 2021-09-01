@@ -64,7 +64,8 @@ public:
   }
   void post(Network::ConnectionSocketPtr&& socket) override;
   void onAcceptWorker(Network::ConnectionSocketPtr&& socket,
-                      bool hand_off_restored_destination_connections, bool rebalanced) override;
+                      bool hand_off_restored_destination_connections, bool rebalanced,
+                      bool accept_traffic_on_any_port) override;
 
   void newActiveConnection(const Network::FilterChain& filter_chain,
                            Network::ServerConnectionPtr server_conn_ptr,

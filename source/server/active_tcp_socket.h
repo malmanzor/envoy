@@ -29,7 +29,7 @@ struct ActiveTcpSocket : public Network::ListenerFilterManager,
                          public Event::DeferredDeletable,
                          Logger::Loggable<Logger::Id::conn_handler> {
   ActiveTcpSocket(ActiveStreamListenerBase& listener, Network::ConnectionSocketPtr&& socket,
-                  bool hand_off_restored_destination_connections);
+                  bool hand_off_restored_destination_connections, bool accept_traffic_on_any_port);
   ~ActiveTcpSocket() override;
 
   void onTimeout();
@@ -91,6 +91,7 @@ struct ActiveTcpSocket : public Network::ListenerFilterManager,
   ActiveStreamListenerBase& listener_;
   Network::ConnectionSocketPtr socket_;
   const bool hand_off_restored_destination_connections_;
+  const bool accept_traffic_on_any_port_;
   std::list<ListenerFilterWrapperPtr> accept_filters_;
   std::list<ListenerFilterWrapperPtr>::iterator iter_;
   Event::TimerPtr timer_;

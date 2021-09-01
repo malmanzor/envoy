@@ -77,7 +77,8 @@ void ActiveTcpListener::onAccept(Network::ConnectionSocketPtr&& socket) {
     return;
   }
 
-  onAcceptWorker(std::move(socket), config_->handOffRestoredDestinationConnections(), false);
+  onAcceptWorker(std::move(socket), config_->handOffRestoredDestinationConnections(), false,
+    config_->acceptTrafficOnAnyPort());
 }
 
 void ActiveTcpListener::onReject(RejectCause cause) {
@@ -93,7 +94,8 @@ void ActiveTcpListener::onReject(RejectCause cause) {
 
 void ActiveTcpListener::onAcceptWorker(Network::ConnectionSocketPtr&& socket,
                                        bool hand_off_restored_destination_connections,
-                                       bool rebalanced) {
+                                       bool rebalanced,
+                                       bool accept_traffic_on_any_port) {
   if (!rebalanced) {
     Network::BalancedConnectionHandler& target_handler =
         config_->connectionBalancer().pickTargetHandler(*this);
@@ -104,7 +106,8 @@ void ActiveTcpListener::onAcceptWorker(Network::ConnectionSocketPtr&& socket,
   }
 
   auto active_socket = std::make_unique<ActiveTcpSocket>(*this, std::move(socket),
-                                                         hand_off_restored_destination_connections);
+                                                         hand_off_restored_destination_connections,
+                                                         accept_traffic_on_any_port);
 
   onSocketAccepted(std::move(active_socket));
 }
@@ -152,10 +155,12 @@ void ActiveTcpListener::post(Network::ConnectionSocketPtr&& socket) {
 
   dispatcher().post([socket_to_rebalance, tag = config_->listenerTag(),
                      &tcp_conn_handler = tcp_conn_handler_,
-                     handoff = config_->handOffRestoredDestinationConnections()]() {
+                     handoff = config_->handOffRestoredDestinationConnections(),
+                     acceptOnAny = config_->acceptTrafficOnAnyPort()]() {
     auto balanced_handler = tcp_conn_handler.getBalancedHandlerByTag(tag);
     if (balanced_handler.has_value()) {
-      balanced_handler->get().onAcceptWorker(std::move(socket_to_rebalance->socket), handoff, true);
+      balanced_handler->get().onAcceptWorker(std::move(socket_to_rebalance->socket), handoff, true,
+        acceptOnAny);
       return;
     }
   });
