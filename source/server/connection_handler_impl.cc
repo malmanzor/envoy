@@ -177,13 +177,42 @@ ConnectionHandlerImpl::getBalancedHandlerByAddress(const Network::Address::Insta
   // This is a linear operation, may need to add a map<address, listener> to improve performance.
   // However, linear performance might be adequate since the number of listeners is small.
   // We do not return stopped listeners.
+  std::cout << "checking for listeners:\n";
   auto listener_it =
       std::find_if(listeners_.begin(), listeners_.end(),
                    [&address](std::pair<Network::Address::InstanceConstSharedPtr,
                                         ConnectionHandlerImpl::ActiveListenerDetails>& p) {
-                     return p.second.tcpListener().has_value() &&
+                      //TODO more debug
+                      std::cout << "checking ";
+                      std::cout << p.first->asString();
+                      std::cout << "\n";
+                      if (p.second.tcpListener().has_value()) {
+                        std::cout << "has tcp listener\n";
+                        if (p.second.tcpListener().value().get().acceptTrafficOnAnyPort()) {
+                          std::cout << "with traffic on any port\n";
+                          
+                        }
+                      }
+
+                      if (p.second.listener_->listener() != nullptr) {
+                        std::cout << "has contained listener\n";
+                      }
+
+                      if (p.first->type() == Network::Address::Type::Ip ) {
+                        std::cout << "is ip type\n";
+                        if (p.first->ip()->ipv4()->address() == address.ip()->ipv4()->address()) {
+                          std::cout << "has matching ip\n";
+                        }
+                      }
+
+                     bool retVal = p.second.tcpListener().has_value() &&
                             p.second.listener_->listener() != nullptr &&
-                            p.first->type() == Network::Address::Type::Ip && *(p.first) == address;
+                            p.first->type() == Network::Address::Type::Ip && 
+                            ( p.second.tcpListener().value().get().acceptTrafficOnAnyPort()? (p.first->ip()->ipv4()->address() == address.ip()->ipv4()->address()) :   *(p.first) == address);
+                    if (retVal) {
+                      std::cout << "returning true\n";
+                    }
+                    return retVal;
                    });
 
   // If there is exact address match, return the corresponding listener.

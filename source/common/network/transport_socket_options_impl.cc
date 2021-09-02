@@ -88,11 +88,15 @@ TransportSocketOptionsUtility::fromFilterState(const StreamInfo::FilterState& fi
     needs_transport_socket_options = true;
   }
 
+  std::cout << "checking to see if the downstream port has been set in filter config\n";
   // TODO check the filter state for a sni port addition from the filter state and add it if needed
   if (filter_state.hasData<DownstreamTargetPort>(DownstreamTargetPort::key())) {
     const auto& port =
         filter_state.getDataReadOnly<DownstreamTargetPort>(DownstreamTargetPort::key());
     downstream_port = port.value();
+    std::cout << "found downstream port ";
+    std::cout << downstream_port;
+    std::cout << ";\n";
     needs_transport_socket_options = true;
   }
 
@@ -113,7 +117,7 @@ TransportSocketOptionsUtility::fromFilterState(const StreamInfo::FilterState& fi
   if (needs_transport_socket_options) {
     return std::make_shared<Network::TransportSocketOptionsImpl>(
         server_name, std::move(subject_alt_names), std::move(application_protocols),
-        std::move(alpn_fallback), proxy_protocol_options);
+        std::move(alpn_fallback), proxy_protocol_options, downstream_port);
   } else {
     return nullptr;
   }
