@@ -290,6 +290,7 @@ ListenerImpl::ListenerImpl(const envoy::config::listener::v3::Listener& config,
           PROTOBUF_GET_WRAPPED_OR_DEFAULT(config, use_original_dst, false)),
       accept_traffic_on_any_port_(
           PROTOBUF_GET_WRAPPED_OR_DEFAULT(config, accept_traffic_on_any_port, false)),
+      accept_traffic_on_cidr_(&config.accept_traffic_on_cidr()),
       per_connection_buffer_limit_bytes_(
           PROTOBUF_GET_WRAPPED_OR_DEFAULT(config, per_connection_buffer_limit_bytes, 1024 * 1024)),
       listener_tag_(parent_.factory_.nextListenerTag()), name_(name), added_via_api_(added_via_api),
@@ -379,6 +380,7 @@ ListenerImpl::ListenerImpl(ListenerImpl& origin,
           PROTOBUF_GET_WRAPPED_OR_DEFAULT(config, use_original_dst, false)),
       accept_traffic_on_any_port_(
           PROTOBUF_GET_WRAPPED_OR_DEFAULT(config, accept_traffic_on_any_port, false)),
+      accept_traffic_on_cidr_(&config.accept_traffic_on_cidr()),
       per_connection_buffer_limit_bytes_(
           PROTOBUF_GET_WRAPPED_OR_DEFAULT(config, per_connection_buffer_limit_bytes, 1024 * 1024)),
       listener_tag_(origin.listener_tag_), name_(name), added_via_api_(added_via_api),

@@ -9,6 +9,7 @@
 #include "source/common/network/utility.h"
 #include "source/common/runtime/runtime_features.h"
 #include "source/server/active_tcp_listener.h"
+#include "source/common/network/cidr_range.h"
 
 namespace Envoy {
 namespace Server {
@@ -178,42 +179,103 @@ ConnectionHandlerImpl::getBalancedHandlerByAddress(const Network::Address::Insta
   // However, linear performance might be adequate since the number of listeners is small.
   // We do not return stopped listeners.
   std::cout << "checking for listeners:\n";
-  auto listener_it =
-      std::find_if(listeners_.begin(), listeners_.end(),
-                   [&address](std::pair<Network::Address::InstanceConstSharedPtr,
-                                        ConnectionHandlerImpl::ActiveListenerDetails>& p) {
-                      //TODO more debug
-                      std::cout << "checking ";
-                      std::cout << p.first->asString();
-                      std::cout << "\n";
-                      if (p.second.tcpListener().has_value()) {
-                        std::cout << "has tcp listener\n";
-                        if (p.second.tcpListener().value().get().acceptTrafficOnAnyPort()) {
-                          std::cout << "with traffic on any port\n";
-                          
-                        }
-                      }
+  auto listener_it = std::find_if(
+      listeners_.begin(), listeners_.end(),
+      [&address](std::pair<Network::Address::InstanceConstSharedPtr,
+                           ConnectionHandlerImpl::ActiveListenerDetails>& p) {
+        // TODO more debug
+        std::cout << "checking ";
+        std::cout << p.first->asString();
+        std::cout << "\n";
+        if (p.second.tcpListener().has_value()) {
+          std::cout << "has tcp listener\n";
+          if (p.second.tcpListener().value().get().acceptTrafficOnAnyPort()) {
+            std::cout << "with traffic on any port\n";
+          }
+        }
 
-                      if (p.second.listener_->listener() != nullptr) {
-                        std::cout << "has contained listener\n";
-                      }
+        if (p.second.listener_->listener() != nullptr) {
+          std::cout << "has contained listener\n";
+        }
 
-                      if (p.first->type() == Network::Address::Type::Ip ) {
-                        std::cout << "is ip type\n";
-                        if (p.first->ip()->ipv4()->address() == address.ip()->ipv4()->address()) {
-                          std::cout << "has matching ip\n";
-                        }
-                      }
+        if (p.first->type() == Network::Address::Type::Ip) {
+          std::cout << "is ip type\n";
+          if (p.first->ip()->ipv4()->address() == address.ip()->ipv4()->address()) {
+            std::cout << "has matching ip\n";
+          }
+        }
 
-                     bool retVal = p.second.tcpListener().has_value() &&
-                            p.second.listener_->listener() != nullptr &&
-                            p.first->type() == Network::Address::Type::Ip && 
-                            ( p.second.tcpListener().value().get().acceptTrafficOnAnyPort()? (p.first->ip()->ipv4()->address() == address.ip()->ipv4()->address()) :   *(p.first) == address);
-                    if (retVal) {
-                      std::cout << "returning true\n";
-                    }
-                    return retVal;
-                   });
+
+
+        bool retVal = p.second.tcpListener().has_value() &&
+                      p.second.listener_->listener() != nullptr &&
+                      p.first->type() == Network::Address::Type::Ip &&
+                      (p.second.tcpListener().value().get().acceptTrafficOnAnyPort()
+                           ? (p.first->ip()->ipv4()->address() == address.ip()->ipv4()->address())
+                           : *(p.first) == address);
+        if (retVal) {
+          std::cout << "returning true\n";
+        }
+        return retVal;
+      });
+
+  // If there is exact address match, return the corresponding listener.
+  if (listener_it != listeners_.end()) {
+    return Network::BalancedConnectionHandlerOptRef(
+        listener_it->second.tcpListener().value().get());
+  }
+
+  //TODO use the cidr range field
+  std::cout << "checking for cidr matches:\n";
+  listener_it = std::find_if(
+      listeners_.begin(), listeners_.end(),
+      [&address](std::pair<Network::Address::InstanceConstSharedPtr,
+                           ConnectionHandlerImpl::ActiveListenerDetails>& p) {
+
+        auto result = false;
+        std::cout << "checking ";
+        std::cout << p.first->asString();
+        std::cout << "\n";
+        if (p.first->type() == Network::Address::Type::Ip && p.second.tcpListener().has_value()) {
+          const envoy::config::core::v3::CidrRange* cidr = p.second.tcpListener().value().get().acceptTrafficOnCidr();
+
+
+
+
+          if (cidr != NULL && cidr != nullptr && cidr->address_prefix().length() > 0) { //TODO that in a better way
+
+          std::cout << "found ";
+          std::cout << cidr->address_prefix();
+          std::cout << "!!\n";
+
+            const envoy::config::core::v3::CidrRange* myRange = cidr;
+            Network::Address::CidrRange range = Network::Address::CidrRange::create(*myRange);
+            std::cout << "checking cidr ";
+            std::cout << range.asString();
+            std::cout << " for ";
+            std::cout << address.asString();
+            std::cout << " with instance ";
+            std::cout << p.first->ip()->addressAsString();
+            std::cout << "\n";
+
+            //auto target = address.ip()->ipv4()->address();
+
+            //Network::Address::CidrRange range = Network::Address::CidrRange::create(cidr);
+
+            //result = range.isInRange(*p.first);//or use address?
+            result = range.isInRange(address);//or use address?
+
+            if (result) {
+              std::cout << "returning true\n";
+            } else {
+              std::cout << "returning false\n";
+            }
+
+          }
+        }
+        return result;
+
+      });
 
   // If there is exact address match, return the corresponding listener.
   if (listener_it != listeners_.end()) {

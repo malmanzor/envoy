@@ -65,7 +65,7 @@ public:
   void post(Network::ConnectionSocketPtr&& socket) override;
   void onAcceptWorker(Network::ConnectionSocketPtr&& socket,
                       bool hand_off_restored_destination_connections, bool rebalanced,
-                      bool accept_traffic_on_any_port) override;
+                      bool accept_traffic_on_any_port, const envoy::config::core::v3::CidrRange* accept_traffic_on_cidr) override;
 
   void newActiveConnection(const Network::FilterChain& filter_chain,
                            Network::ServerConnectionPtr server_conn_ptr,
@@ -82,9 +82,9 @@ public:
   // connection balancing across per-handler listeners.
   std::atomic<uint64_t> num_listener_connections_{};
 
-  bool acceptTrafficOnAnyPort() {
-    return config_->acceptTrafficOnAnyPort();
-  }
+  bool acceptTrafficOnAnyPort() { return config_->acceptTrafficOnAnyPort(); }
+
+  const envoy::config::core::v3::CidrRange* acceptTrafficOnCidr() {return config_->acceptTrafficOnCidr(); }
 };
 
 using ActiveTcpListenerOptRef = absl::optional<std::reference_wrapper<ActiveTcpListener>>;

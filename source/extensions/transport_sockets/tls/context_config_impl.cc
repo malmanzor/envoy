@@ -339,7 +339,7 @@ ClientContextConfigImpl::ClientContextConfigImpl(
     Server::Configuration::TransportSocketFactoryContext& factory_context)
     : ContextConfigImpl(config.common_tls_context(), DEFAULT_MIN_VERSION, DEFAULT_MAX_VERSION,
                         DEFAULT_CIPHER_SUITES, DEFAULT_CURVES, factory_context),
-      server_name_indication_(config.sni()), 
+      server_name_indication_(config.sni()),
       append_downstream_port_to_sni_(config.append_downstream_port_to_sni()),
       allow_renegotiation_(config.allow_renegotiation()),
       max_session_keys_(PROTOBUF_GET_WRAPPED_OR_DEFAULT(config, max_session_keys, 1)),

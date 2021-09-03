@@ -11,10 +11,11 @@ namespace Server {
 ActiveTcpSocket::ActiveTcpSocket(ActiveStreamListenerBase& listener,
                                  Network::ConnectionSocketPtr&& socket,
                                  bool hand_off_restored_destination_connections,
-                                 bool accept_traffic_on_any_port)
+                                 bool accept_traffic_on_any_port, const envoy::config::core::v3::CidrRange* accept_traffic_on_cidr)
     : listener_(listener), socket_(std::move(socket)),
       hand_off_restored_destination_connections_(hand_off_restored_destination_connections),
-      accept_traffic_on_any_port_(accept_traffic_on_any_port), iter_(accept_filters_.end()),
+      accept_traffic_on_any_port_(accept_traffic_on_any_port),
+      accept_traffic_on_cidr_(accept_traffic_on_cidr), iter_(accept_filters_.end()),
       stream_info_(std::make_unique<StreamInfo::StreamInfoImpl>(
           listener_.dispatcher().timeSource(), socket_->addressProviderSharedPtr(),
           StreamInfo::FilterState::LifeSpan::Connection)) {
@@ -135,7 +136,7 @@ void ActiveTcpSocket::newConnection() {
     // Note also that we must account for the number of connections properly across both listeners.
     // TODO(mattklein123): See note in ~ActiveTcpSocket() related to making this accounting better.
     listener_.decNumConnections();
-    new_listener.value().get().onAcceptWorker(std::move(socket_), false, false, false);
+    new_listener.value().get().onAcceptWorker(std::move(socket_), false, false, false, nullptr);
   } else {
     // Set default transport protocol if none of the listener filters did it.
     if (socket_->detectedTransportProtocol().empty()) {

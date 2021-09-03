@@ -35,7 +35,7 @@ public:
 
   virtual void onAcceptWorker(Network::ConnectionSocketPtr&& socket,
                               bool hand_off_restored_destination_connections, bool rebalanced,
-                              bool accept_traffic_on_any_port) PURE;
+                              bool accept_traffic_on_any_port, const envoy::config::core::v3::CidrRange* accept_traffic_on_cidr) PURE;
 };
 
 /**

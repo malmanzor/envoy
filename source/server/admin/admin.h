@@ -352,6 +352,7 @@ private:
     bool bindToPort() override { return true; }
     bool handOffRestoredDestinationConnections() const override { return false; }
     bool acceptTrafficOnAnyPort() const override { return false; }
+    const envoy::config::core::v3::CidrRange* acceptTrafficOnCidr() const override { return nullptr; }
     uint32_t perConnectionBufferLimitBytes() const override { return 0; }
     std::chrono::milliseconds listenerFiltersTimeout() const override { return {}; }
     bool continueOnListenerFiltersTimeout() const override { return false; }

@@ -298,6 +298,7 @@ public:
     return hand_off_restored_destination_connections_;
   }
   bool acceptTrafficOnAnyPort() const override { return accept_traffic_on_any_port_; }
+  const envoy::config::core::v3::CidrRange* acceptTrafficOnCidr() const override { return accept_traffic_on_cidr_; }
   uint32_t perConnectionBufferLimitBytes() const override {
     return per_connection_buffer_limit_bytes_;
   }
@@ -391,6 +392,7 @@ private:
   const bool bind_to_port_;
   const bool hand_off_restored_destination_connections_;
   const bool accept_traffic_on_any_port_;
+  const envoy::config::core::v3::CidrRange* accept_traffic_on_cidr_;
   const uint32_t per_connection_buffer_limit_bytes_;
   const uint64_t listener_tag_;
   const std::string name_;

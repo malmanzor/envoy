@@ -139,6 +139,8 @@ public:
 
   virtual bool acceptTrafficOnAnyPort() const PURE;
 
+  virtual const envoy::config::core::v3::CidrRange* acceptTrafficOnCidr() const PURE;
+
   /**
    * @return bool if a connection should be handed off to another Listener after the original
    *         destination address has been restored. 'true' when 'use_original_dst' flag in listener

@@ -116,6 +116,7 @@ public:
       return hand_off_restored_destination_connections_;
     }
     bool acceptTrafficOnAnyPort() const override { return accept_traffic_on_any_port_; }
+    envoy::config::core::v3::CidrRange& acceptTrafficOnCidr() const override { return accept_traffic_on_cidr_; }
     uint32_t perConnectionBufferLimitBytes() const override { return 0; }
     std::chrono::milliseconds listenerFiltersTimeout() const override {
       return listener_filters_timeout_;
@@ -151,6 +152,7 @@ public:
     const uint32_t tcp_backlog_size_;
     const bool hand_off_restored_destination_connections_;
     const bool accept_traffic_on_any_port_;
+    const string accept_traffic_on_cidr_;
     const std::string name_;
     const std::chrono::milliseconds listener_filters_timeout_;
     const bool continue_on_listener_filters_timeout_;

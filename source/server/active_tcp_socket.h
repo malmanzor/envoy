@@ -29,7 +29,8 @@ struct ActiveTcpSocket : public Network::ListenerFilterManager,
                          public Event::DeferredDeletable,
                          Logger::Loggable<Logger::Id::conn_handler> {
   ActiveTcpSocket(ActiveStreamListenerBase& listener, Network::ConnectionSocketPtr&& socket,
-                  bool hand_off_restored_destination_connections, bool accept_traffic_on_any_port);
+                  bool hand_off_restored_destination_connections, bool accept_traffic_on_any_port,
+                  const envoy::config::core::v3::CidrRange* accept_traffic_on_cidr);
   ~ActiveTcpSocket() override;
 
   void onTimeout();
@@ -92,6 +93,7 @@ struct ActiveTcpSocket : public Network::ListenerFilterManager,
   Network::ConnectionSocketPtr socket_;
   const bool hand_off_restored_destination_connections_;
   const bool accept_traffic_on_any_port_;
+  const envoy::config::core::v3::CidrRange* accept_traffic_on_cidr_;
   std::list<ListenerFilterWrapperPtr> accept_filters_;
   std::list<ListenerFilterWrapperPtr>::iterator iter_;
   Event::TimerPtr timer_;

@@ -94,6 +94,7 @@ envoy_cc_library(
         "//source/common/event:deferred_task",
         "//source/common/network:connection_lib",
         "//source/common/stream_info:stream_info_lib",
+        "//source/common/network:cidr_range_lib",
     ],
 )
 
