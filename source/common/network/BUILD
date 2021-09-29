@@ -434,6 +434,7 @@ envoy_cc_library(
         "//envoy/stream_info:filter_state_interface",
         "//source/common/common:scalar_to_byte_vector_lib",
         "//source/common/common:utility_lib",
+        "//source/extensions/filters/common/expr:cel_state_lib",
     ],
 )
 

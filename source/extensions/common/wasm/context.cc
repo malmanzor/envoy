@@ -1123,6 +1123,15 @@ WasmResult Context::setProperty(std::string_view path, std::string_view value) {
   }
   std::string key;
   absl::StrAppend(&key, CelStateKeyPrefix, toAbslStringView(path));
+
+  std::cout << "my key is: ";
+  std::cout << key;
+  std::cout << " with path ";
+  std::cout << path;
+  std::cout << " and value ";
+  std::cout << value;
+  std::cout << "\n";
+
   CelState* state;
   if (stream_info->filterState()->hasData<CelState>(key)) {
     state = &stream_info->filterState()->getDataMutable<CelState>(key);

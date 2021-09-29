@@ -435,6 +435,15 @@ Network::FilterStatus Filter::initializeUpstreamConnection() {
         std::make_unique<Network::DownstreamTargetPort>(
             std::to_string(downstreamConnection()->addressProvider().localAddress()->ip()->port())),
         StreamInfo::FilterState::StateType::Mutable);
+
+    //TODO move to an appropriate spot
+    //read_callbacks_->connection().streamInfo().filterState()->setData(
+    //    Network::UpstreamServerName::key(),
+    //    std::make_unique<Network::UpstreamServerName>(
+    //        std::to_string(downstreamConnection()->addressProvider().localAddress()->ip()->port())),
+    //    StreamInfo::FilterState::StateType::Mutable);
+
+
   }
 
   if (downstreamConnection()) {

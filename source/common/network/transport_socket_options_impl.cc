@@ -13,6 +13,7 @@
 #include "source/common/network/proxy_protocol_filter_state.h"
 #include "source/common/network/upstream_server_name.h"
 #include "source/common/network/upstream_subject_alt_names.h"
+#include "source/extensions/filters/common/expr/cel_state.h"
 
 namespace Envoy {
 namespace Network {
@@ -70,7 +71,24 @@ TransportSocketOptionsUtility::fromFilterState(const StreamInfo::FilterState& fi
 
   std::cout << "creating a new transport socket options using filter state\n";
 
+  if (filter_state.hasData<Extensions::Filters::Common::Expr::CelState>("wasm.envoy.network.upstream_server_name")) {
+    std::cout << "found the upstream server name from wasm with prefix\n";
+  }
+
+ 
+
   bool needs_transport_socket_options = false;
+
+
+ if (filter_state.hasData<Extensions::Filters::Common::Expr::CelState>("wasm.env")) {
+    std::cout << "found the upstream server name from wasm with env prefix\n";
+    const auto& upstream_server_name =
+        filter_state.getDataReadOnly<Extensions::Filters::Common::Expr::CelState>("wasm.env");
+    server_name = upstream_server_name.value();
+    needs_transport_socket_options = true;
+  
+  }
+
   if (filter_state.hasData<UpstreamServerName>(UpstreamServerName::key())) {
     const auto& upstream_server_name =
         filter_state.getDataReadOnly<UpstreamServerName>(UpstreamServerName::key());
