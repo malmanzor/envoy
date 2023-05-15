@@ -41,6 +41,7 @@
 #include "source/common/stream_info/stream_info_impl.h"
 #include "source/common/upstream/load_balancer_impl.h"
 #include "source/common/upstream/upstream_http_factory_context_impl.h"
+#include "source/common/common/random_generator.h"
 
 namespace Envoy {
 namespace Router {
@@ -490,10 +491,10 @@ public:
     // Since the downstream port is part of the hashed value, multiple HTTP1
     // connections can receive different cookies if they race on requests.
     std::string value;
-    const Network::Connection* conn = downstreamConnection();
+    //const Network::Connection* conn = downstreamConnection();
     // Need to check for null conn if this is ever used by Http::AsyncClient in the future.
-    value = conn->connectionInfoProvider().remoteAddress()->asString() +
-            conn->connectionInfoProvider().localAddress()->asString();
+    Random::RandomGeneratorImpl rand = Random::RandomGeneratorImpl();
+    value = rand.uuid();
 
     const std::string cookie_value = Hex::uint64ToHex(HashUtil::xxHash64(value));
     downstream_set_cookies_.emplace_back(
